@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quic-broker-deployment
+  labels:
+    app: quic-broker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: quic-broker
+  template:
+    metadata:
+      labels:
+        app: quic-broker
+    spec:
+      containers:
+        - name: quic-broker
+          image: ghcr.io/mohammadiahmad/quicmessagebroker/quic-broker:0.0.1
+          ports:
+            - containerPort: 4040
+          args: ["server"]
