@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: quic-svc-lb
+spec:
+  type: LoadBalancer
+  ports:
+    - name: "4040-udp"
+      targetPort: udp-4040
+      port: 4040
+      protocol: UDP
+  selector:
+    app.kubernetes.io/instance: quic-broker
+    app.kubernetes.io/name: quic-broker
+
