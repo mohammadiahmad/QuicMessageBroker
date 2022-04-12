@@ -22,7 +22,7 @@ func Server() *cobra.Command {
 
 func main(cmd *cobra.Command, _ []string) {
 	cfg := server.Config{
-		"localhost",
+		"0.0.0.0",
 		"4040",
 	}
 	s := server.NewQuicBroker(cfg)
