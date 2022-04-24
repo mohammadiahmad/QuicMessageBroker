@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: quic-broker-deployment
+  name: quic-broker
   labels:
     app: quic-broker
 spec:
@@ -19,4 +19,5 @@ spec:
           image: ghcr.io/mohammadiahmad/quicmessagebroker/quic-broker:0.0.1
           ports:
             - containerPort: 4040
+              protocol: UDP
           args: ["server"]
