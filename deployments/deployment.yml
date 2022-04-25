@@ -16,8 +16,18 @@ spec:
     spec:
       containers:
         - name: quic-broker
-          image: ghcr.io/mohammadiahmad/quicmessagebroker/quic-broker:0.0.1
+          image: ghcr.io/mohammadiahmad/quicmessagebroker/quic-broker:0.0.4
           ports:
             - containerPort: 4040
               protocol: UDP
           args: ["server"]
+          env:
+            - name: QUIC__SERVER__HOST
+              value: "0.0.0.0"
+            - name: QUIC__SERVER__PORT
+              value: "4040"
+            - name: QUIC__SERVER__MSG_COUNT
+              value: "1000"
+            - name: QUIC__SERVER__RATE_LIMIT
+              value: "100"
+
