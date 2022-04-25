@@ -2,6 +2,8 @@ package server
 
 import (
 	"fmt"
+
+	"github.com/mohammadiahmad/QuicMessageBroker/internal/config"
 	"github.com/mohammadiahmad/QuicMessageBroker/internal/server"
 	"github.com/spf13/cobra"
 )
@@ -21,12 +23,14 @@ func Server() *cobra.Command {
 }
 
 func main(cmd *cobra.Command, _ []string) {
-	cfg := server.Config{
-		"0.0.0.0",
-		"4040",
+	cfg, err := config.Load()
+	if err != nil {
+		fmt.Println("cannot load config")
+		panic(err)
 	}
-	s := server.NewQuicBroker(cfg)
-	err := s.Run()
-	fmt.Println(err)
+
+	s := server.NewQuicBroker(cfg.Server)
+	err = s.Run()
+	fmt.Println("cannot run quic server", err)
 
 }

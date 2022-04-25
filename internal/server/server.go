@@ -9,12 +9,15 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"github.com/lucas-clemente/quic-go"
 	"io"
 	"log"
 	"math/big"
 	"strings"
 	"sync"
+	"time"
+
+	"github.com/lucas-clemente/quic-go"
+	"go.uber.org/ratelimit"
 )
 
 type Client struct {
@@ -23,17 +26,19 @@ type Client struct {
 }
 
 type QuicBroker struct {
-	config  Config
+	config  *Config
 	clients map[string]Client
 	mux     sync.RWMutex
 }
 
 type Config struct {
-	Host string
-	Port string
+	Host         string `mapstructure:"host"`
+	Port         string `mapstructure:"port"`
+	MessageCount int    `mapstructure:"msg_count"`
+	RateLimit    int    `mapstructure:"rate_limit"`
 }
 
-func NewQuicBroker(cfg Config) QuicBroker {
+func NewQuicBroker(cfg *Config) QuicBroker {
 	return QuicBroker{
 		config:  cfg,
 		clients: make(map[string]Client),
@@ -71,9 +76,10 @@ func (q *QuicBroker) randomDataProducer(clientId string) {
 	q.mux.RLock()
 	client := q.clients[clientId]
 	q.mux.RUnlock()
-	for {
+	rt := ratelimit.New(q.config.RateLimit)
+	for i := 0; i <= q.config.MessageCount; i++ {
+		rt.Take()
 		client.msgChan <- []byte(fmt.Sprintf("message from server to client %s \n", clientId))
-		//time.Sleep(1*time.Second)
 	}
 
 }
@@ -109,11 +115,12 @@ func (q *QuicBroker) communicate(sess quic.Connection) error {
 			select {
 			case s := <-messageChan:
 				_, err := stream.Write(s)
+				stream.SetWriteDeadline(time.Now().Add(1 * time.Second))
 				if err != nil {
 					q.mux.Lock()
 					delete(q.clients, clientID)
 					q.mux.Unlock()
-					break
+					return err
 				}
 			}
 		}
