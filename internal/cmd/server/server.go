@@ -24,6 +24,7 @@ func Server() *cobra.Command {
 
 func main(cmd *cobra.Command, _ []string) {
 	cfg, err := config.Load()
+
 	if err != nil {
 		fmt.Println("cannot load config")
 		panic(err)
